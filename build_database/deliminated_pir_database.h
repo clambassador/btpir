@@ -18,7 +18,7 @@
 #ifndef __BTPIR__DELIMINATED_PIR_DATABASE__H__
 #define __BTPIR__DELIMINATED_PIR_DATABASE__H__
 
-#include "build_database/pir_database_base.h"
+#include "build_database/pir_database_manifest_base.h"
 
 #include <fstream>
 #include <string>
@@ -52,10 +52,10 @@ namespace btpir {
    the full address, then (and only) is the 35-byte current address listed after the
    4-bytes bytes remaining number.
 */
-class DeliminatedPIRDatabase : public PIRDatabaseBase {
+class DeliminatedPIRDatabase : public PIRDatabaseManifestBase {
 public:
 	DeliminatedPIRDatabase(const string& directory, const string& filename)
-		: PIRDatabaseBase(directory, filename), _len_len(4) {
+		: PIRDatabaseManifestBase(directory, filename), _len_len(4) {
 		_fmt = "format_2";
 	}
 	virtual ~DeliminatedPIRDatabase() {

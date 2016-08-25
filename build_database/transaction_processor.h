@@ -167,7 +167,6 @@ public:
 		short_db.open_for_write(
 			Logger::stringify("%_%.pir", filename, _pir_blocksize));
 		uint64_t pos = 0;
-		Logger::info("TXs in a row   : %", _txs.size());
 		for (auto &x : _txs) {
 			uint64_t pos_handle = pos;
 			short_db.start_tx(x.length());

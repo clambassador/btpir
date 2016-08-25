@@ -17,7 +17,7 @@
 #ifndef __BTPIR__BUILD_DATABASE__AUTO_DELIMINATED_PIR_DATABASE__H__
 #define __BTPIR__BUILD_DATABASE__AUTO_DELIMINATED_PIR_DATABASE__H__
 
-#include "build_database/pir_database_base.h"
+#include "build_database/pir_database_manifest_base.h"
 
 #include <fstream>
 #include <string>
@@ -39,7 +39,7 @@ namespace btpir {
    binary string corresponding to a yes/no decision on that particular block.
    As such each block has the same size and is therefore auto deliminated.
  */
-class AutoDeliminatedPIRDatabase : public PIRDatabaseBase {
+class AutoDeliminatedPIRDatabase : public PIRDatabaseManifestBase {
 public:
 	/* Creates an auto deliminated (format 1) PIR database.
 	 * @directory: the directory where the output is stored
@@ -51,14 +51,13 @@ public:
 	 */
 	AutoDeliminatedPIRDatabase(const string& directory,
 				   const string& filename)
-			: PIRDatabaseBase(directory, filename) {
+			: PIRDatabaseManifestBase(directory, filename) {
 	}
 
 	/* Destructor finishes writing the database. It fills the final block's
 	 * leftover content with zeros and closes the file.
 	 */
 	virtual ~AutoDeliminatedPIRDatabase() {
-		// TODO: close manifest?
 	}
 
 	virtual void build(const vector<string>& addresses,
@@ -79,6 +78,17 @@ protected:
 	virtual void pre_write() {}
 	virtual void post_write() {}
 
+        virtual void start_tx(const string& address, uint32_t length) {
+	}
+	/* In the auto-deliminated, the new block is called before starting
+	   the next write, and we want the address about the previous one.
+	 */
+	virtual void end_tx(const string& address, uint32_t length) {
+		_cur_addr = address;
+	}
+
+
+
 	virtual size_t footer_len() const {
 		return 0;
 	}
@@ -87,8 +97,13 @@ protected:
 		return 0;
 	}
 
+	virtual void write_opening_header() {
+	}
+
 	virtual void write_closing_footer() {
 		new_block(0);
+	//	Logger::alert("lirst %", _cur_addr);
+	//	*_fmanifest << _cur_addr << endl;
 	}
 
 	/* Writes @len bytes of the the string @data to the current output file
@@ -102,21 +117,6 @@ protected:
 		_total_size += len;
 		assert(_cur_distance <= _pir_blocksize_bytes);
 	}
-
-	unique_ptr<ofstream> _fout;
-	unique_ptr<ofstream> _fmanifest;
-	string _cur_addr;
-	vector<string> _metadata;
-	vector<string> _data;
-	uint64_t _pir_blocks;
-	uint64_t _pir_blocksize_bytes;
-	uint64_t _cur_distance;
-	uint64_t _total_size;
-	uint64_t _blocksize_useable;
-	uint64_t _len;
-	uint64_t _blocks;
-	int _cur_block;
-	string _filename;
 };
 
 }  // namespace btpir

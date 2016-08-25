@@ -47,9 +47,6 @@ public:
 	 * leftover content with zeros and closes the file.
 	 */
 	virtual ~PIRDatabaseBase() {
-		write_zeros(get_safe_len());
-		write_closing_footer();
-		_fout->close();
 
 		Logger::info("(btpir) Wrote % PIR DB: %", _fmt, _filename);
 		Logger::info("(btpir) Total size (B): %", _total_size);
@@ -65,12 +62,7 @@ public:
                                                         _filename,
                                                         _blocks,
                                                         _pir_blocksize_bytes);
-                char buf[1024];
-                getcwd(buf, 1024);
-                Logger::info("cwd is %", buf);
                 assert(!rename(old_filename.c_str(), new_filename.c_str()));
-                assert(!rename((old_filename + ".manifest").c_str(),
-                               (new_filename + ".manifest").c_str()));
 	}
 
 protected:
@@ -92,12 +84,6 @@ protected:
 					  _pir_blocksize_bytes)));
 		assert(_fout->good());
 
-		/* TODO: sort this for nonbase ones */
-		_fmanifest.reset(new ofstream(
-			Logger::stringify("%_%.pir.manifest",
-					  _filename,
-					  _pir_blocksize_bytes)));
-		assert(_fmanifest->good());
 		_cur_distance = header_len();
 		_total_size = header_len();
 		_cur_block = 0;
@@ -174,13 +160,14 @@ protected:
 		assert(data.size());
 		assert(data.size() == addresses.size());
 
-		Logger::info("processing % entries, first %",
-			     data.size(), addresses[0]);
 	        for (size_t i = 0; i < data.size(); ++i) {
 			start_tx(addresses[i], data[i].length());
 			write(data[i]);
 			end_tx(addresses[i], data[i].length());
 		}
+		write_zeros(get_safe_len());
+		write_closing_footer();
+		_fout->close();
 	}
 
 	/* remaining(): returns the bytes still remaining on the PIR block. */
@@ -191,8 +178,6 @@ protected:
 	/* new_block(): called whenever a new PIR block is created. */
 	virtual void new_block(size_t remaining) {
 		write_footer(remaining);
-		*_fmanifest << _cur_addr << endl;
-		assert(_fmanifest->good());
 		++_cur_block;
 		_cur_distance = header_len();
 		_total_size += footer_len() + header_len();
@@ -252,7 +237,6 @@ protected:
 	}
 
 	unique_ptr<ofstream> _fout;
-	unique_ptr<ofstream> _fmanifest;
 	string _cur_addr;
 	uint64_t _pir_blocksize_bytes;
 	uint64_t _cur_distance;
@@ -266,6 +250,6 @@ protected:
 	string _fmt;
 };
 
-}  // namespace bitcoin_pir
+}  // namespace btpir
 
-#endif  // __DELIMINATED_PIR_DATABASE__H__
+#endif  // __PIR_DATABASE_BASE__H__
