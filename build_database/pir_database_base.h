@@ -97,6 +97,7 @@ protected:
          */
 	virtual void start_tx(const string& address, uint32_t length) {
 		_cur_addr = address;
+		_blocks_used.clear();
 	}
 
 	/* Returns the total data that has been written to the PIR database.
@@ -206,9 +207,11 @@ protected:
 			assert(pivot <= _pir_blocksize_bytes);
                         if (len <= pivot) {
                                 safe_write(data + written, len);
+				_blocks_used.insert(_cur_block);
                                 return;
                         }
                         safe_write(data + written, pivot);
+			_blocks_used.insert(_cur_block);
                         written += pivot;
                         len -= pivot;
                         new_block(len);
@@ -245,9 +248,10 @@ protected:
 	uint64_t _len;
 	uint64_t _blocks;
 	uint64_t _addr_len;
-	int _cur_block;
+	uint32_t _cur_block;
 	string _filename;
 	string _fmt;
+	set<uint32_t> _blocks_used;
 };
 
 }  // namespace btpir

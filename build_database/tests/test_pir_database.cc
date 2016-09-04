@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <iostream>
+#include <fstream>
 #include <string>
 
 using namespace btpir;
@@ -30,21 +31,21 @@ int main(int argc, char** argv) {
 	TransactionProcessor db(".", "test_out.pirdb");
 	vector<set<string>> sets;
 	sets.resize(7);
-	sets[0].insert("b                      r           ");
-	sets[1].insert("a                      z           ");
-	sets[1].insert("b                      r           ");
-	sets[1].insert("c                      a           ");
-	sets[2].insert("d                      j           ");
-	sets[3].insert("e                      e           ");
-	sets[4].insert("f                      o           ");
-	sets[5].insert("g                     j            ");
-	sets[6].insert("h                     h            ");
-	sets[6].insert("i                     n            ");
-	sets[3].insert("f                     m            ");
-	sets[4].insert("g                     j            ");
-	sets[5].insert("h                     h            ");
-	sets[6].insert("i                     n            ");
-	sets[6].insert("a                      z           ");
+	sets[0].insert("b______________________r___________");
+	sets[1].insert("a______________________z___________");
+	sets[1].insert("b______________________r___________");
+	sets[1].insert("c______________________a___________");
+	sets[2].insert("d______________________j___________");
+	sets[3].insert("e______________________e___________");
+	sets[4].insert("f______________________o___________");
+	sets[5].insert("g_____________________j____________");
+	sets[6].insert("h_____________________h____________");
+	sets[6].insert("i_____________________n____________");
+	sets[3].insert("f_____________________m____________");
+	sets[4].insert("g_____________________j____________");
+	sets[5].insert("h_____________________h____________");
+	sets[6].insert("i_____________________n____________");
+	sets[6].insert("a______________________z___________");
 	vector<string> words;
 	words.push_back("swerve");
 	words.push_back("shore");
@@ -53,8 +54,17 @@ int main(int argc, char** argv) {
 	words.push_back("brings");
 	words.push_back("recirculation");
 	words.push_back("back");
+
+	ofstream fout("test_tx_list");
 	for (int i = 0; i < words.size(); ++i) {
 		words[i].resize(800 * i);
 		db.add_tx(sets[i], words[i]);
+		fout << sets[i].size() << endl;
+		for (auto &x : sets[i]) {
+			fout << x << endl;
+		}
+		fout << words[i].length() << endl;
+		fout.write(words[i].c_str(), words[i].length());
+		fout << endl;
 	}
 }
