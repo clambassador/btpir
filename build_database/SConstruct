@@ -20,6 +20,7 @@ for i in range(0, 15):
 
 tests = dict()
 tests["tests/test_pir_database.cc"] = 'test_pir_database'
+tests["tests/test_pir_database_big.cc"] = 'test_pir_database_big'
 mains = dict()
 mains["mains/build_pir_databases.cc"] = 'build_pir_databases'
 
